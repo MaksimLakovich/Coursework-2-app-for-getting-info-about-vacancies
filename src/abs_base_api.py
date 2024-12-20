@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
 
 class BaseAPI(ABC):
@@ -10,8 +11,8 @@ class BaseAPI(ABC):
         pass
 
     @abstractmethod
-    def load_vacancies(self, keyword: str) -> list:
+    def load_vacancies(self, keyword: str) -> list[dict[str, Any]]:
         """Метод для получения вакансии с API сервиса по ключевому слову.
         :param keyword: Ключевое слово для получения данных о вакансиях.
-        :return: Файл-json"""
+        :return: Файл с полученными вакансиями."""
         pass
