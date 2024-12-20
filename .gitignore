@@ -168,6 +168,5 @@ pytest.ini
 config.py
 logger.py
 
-tests/
+tests/conftest.py
 example/
-logs/
