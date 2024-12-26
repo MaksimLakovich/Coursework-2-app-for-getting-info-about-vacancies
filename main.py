@@ -1,5 +1,6 @@
-from src.hh_api import HeadHunterAPI
+from src.exchange_rates import EXCHANGE_RATES_CACHE
 from src.get_vacancies import Vacancy
+from src.hh_api import HeadHunterAPI
 
 
 # Создание экземпляра класса для работы с API сайтов с вакансиями
@@ -29,6 +30,16 @@ vacancy = Vacancy(
 if __name__ == "__main__":
     print(type(hh_vacancies_data))
     print(type(vacancies_list))
-    print(vacancy.id, vacancy.name , vacancy.area_name , vacancy.alternate_url , vacancy.salary_from ,
-          vacancy.salary_to , vacancy.salary_currency , vacancy.published_at , vacancy.archived ,
-          vacancy.snippet_responsibility,)
+    print(
+        vacancy.id,
+        vacancy.name,
+        vacancy.area_name,
+        vacancy.alternate_url,
+        vacancy.salary_from,
+        vacancy.salary_to,
+        vacancy.salary_currency,
+        vacancy.published_at,
+        vacancy.archived,
+        vacancy.snippet_responsibility,
+    )
+    print(EXCHANGE_RATES_CACHE)

@@ -1,5 +1,7 @@
 from typing import Any
 
+from src.exchange_rates import get_exchange_rates
+
 
 class Vacancy:
     """Класс для работы с вакансиями."""
@@ -35,8 +37,8 @@ class Vacancy:
         self.name = name
         self.area_name = area_name
         self.alternate_url = alternate_url
-        self.salary_from = self.__validate_salary(salary_from)
-        self.salary_to = self.__validate_salary(salary_to)
+        self.salary_from = self.__validate_salary(salary=salary_from, currency=salary_currency)
+        self.salary_to = self.__validate_salary(salary=salary_to, currency=salary_currency)
         self.salary_currency = self.__validate_currency(salary_currency)
         self.published_at = published_at
         self.archived = archived
@@ -50,11 +52,21 @@ class Vacancy:
                 2) если зарплата установлена в другой валюте, то будем выполнять конвертацию в рубли."""
         return currency or "RUB"
 
-    def __validate_salary(self, salary: float | None) -> float:
-        """Приватный метод проверки значения зарплаты.
+    def __validate_salary(self, salary: float | None, currency: str | None) -> float:
+        """Приватный метод проверки значения зарплаты (валидация пустых значений),
+        если валюта != RUB, то выполнение конвертации валюты в RUB.
         :param salary: Значения 'from' и 'to' из 'salary', которые поступают из запроса к API сервиса вакансий.
-        :return: Возвращает ноль, если зарплата не указана на сервисе вакансий."""
-        return salary if salary and salary > 0 else 0.0
+        :param currency: Значение валюты, которое поступает из запроса к API сервиса вакансий.
+        :return: Возвращает дробное число:
+                1) ноль, если зарплата не указана на сервисе вакансий;
+                2) конвертируемое значение по текущему курсу валют, если зарплата в отличной от RUB валюте.
+                3) текущее значение без изменения, если зарплата на сервисе вакансий указана в RUB."""
+        if not salary or salary <= 0:
+            return 0.0
+        if currency and currency != "RUR":
+            return salary * get_exchange_rates(currency_name=currency)
+        # Возвращаем исходное значение зарплаты, так как оно в RUB и не требует конвертации
+        return salary
 
     def __eq__(self, other: object) -> bool:
         """Магический метод для операции сравнения 'равенство' (self = other)."""
