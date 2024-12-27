@@ -12,7 +12,7 @@ class HeadHunterAPI(BaseAPI):
         """Конструктор для инициализации подключения к API сервису."""
         self.__url = "https://api.hh.ru/vacancies"
         self.__headers = {"User-Agent": "HH-User-Agent"}
-        self.__params = {"text": "", "page": 0, "per_page": 100}
+        self.__params: dict[str, str | int] = {"text": "", "page": 0, "per_page": 100}
         # Итоговый список в который складываются вакансии list[dict[str, Any]]
         self.__vacancies: list[dict[str, Any]] = []
 
