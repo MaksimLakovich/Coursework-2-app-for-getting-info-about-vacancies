@@ -40,14 +40,14 @@ class BaseFileWork(ABC):
         pass
 
     @abstractmethod
-    def get_vacancy(self) -> None:
+    def get_vacancy(self, vacancy: "Vacancy") -> None:
         """Метод получения вакансий из файла.
         ВАЖНО:
             Метод get_vacancy будет принимать параметры для фильтрации (например, по id или salary или описанию)."""
         pass
 
     @abstractmethod
-    def delete_vacancy(self) -> None:
+    def delete_vacancy(self, vacancy: "Vacancy") -> None:
         """Метод удаления вакансий из файла.
         Работает с id."""
         pass
