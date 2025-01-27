@@ -4,7 +4,9 @@ from typing import Any
 import requests
 from dotenv import load_dotenv
 
-# Кеш для сохранения курсов валют
+# Кеш для сохранения курсов валют при запуске программы, чтоб не отправлять множество запросов по одной и той же валюте
+# в одном запуске (например, нет смысла по 500 вакансиям в USD или EUR отправлять 500 одинаковых запросов на ресурс
+# https://api.apilayer.com/exchangerates_data/convert)
 EXCHANGE_RATES_CACHE: dict[str, float] = {}
 
 

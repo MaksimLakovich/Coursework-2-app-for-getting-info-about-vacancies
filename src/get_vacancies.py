@@ -101,11 +101,11 @@ class Vacancy:
                 name=data["name"],
                 area_name=data["area"]["name"],
                 alternate_url=data["alternate_url"],
-                # None, если salary отсутствует
+                # Проверяю наличие salary. Указываю None, если salary отсутствует
                 salary_from=(data.get("salary") or {}).get("from"),
-                # None, если salary отсутствует
+                # Проверяю наличие salary. Указываю None, если salary отсутствует
                 salary_to=(data.get("salary") or {}).get("to"),
-                # None, если salary отсутствует
+                # Проверяю наличие salary. Указываю None, если salary отсутствует
                 salary_currency=(data.get("salary") or {}).get("currency"),
                 published_at=data["published_at"],
                 archived=data["archived"],
