@@ -1,3 +1,4 @@
+from config import file_with_vacancies
 from src.exchange_rates import EXCHANGE_RATES_CACHE
 from src.get_vacancies import Vacancy
 from src.hh_api import HeadHunterAPI
@@ -28,9 +29,10 @@ vacancy = Vacancy(
 )
 
 # Сохранение информации о вакансиях в файл
-json_saver = JSONSaver()
+json_saver = JSONSaver(file_with_vacancies)
 json_saver.add_vacancy(vacancy)
-json_saver.delete_vacancy(vacancy)
+# json_saver.add_vacancy(vacancies_list)
+# json_saver.delete_vacancy(vacancy)
 
 
 if __name__ == "__main__":
@@ -49,3 +51,6 @@ if __name__ == "__main__":
         vacancy.snippet_responsibility,
     )
     print(EXCHANGE_RATES_CACHE)
+    json_saver = JSONSaver(file_with_vacancies)
+    json_saver.add_vacancy(vacancy)
+    # json_saver.add_vacancy(vacancies_list)

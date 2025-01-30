@@ -1,17 +1,38 @@
+import json
+from pathlib import Path
+from typing import Union
+
+from config import initialize_directories
 from src.abs_base_file_work import BaseFileWork
 from src.get_vacancies import Vacancy
+from src.vacancy_to_dict import vacancy_to_dict
 
 
 class JSONSaver(BaseFileWork):
     """Класс-наследник от абстрактного класса (BaseFileWork) для работы с JSON-файлами (работа с вакансиями)."""
 
-    def __init__(self, file_with_vacancies: str = "./data/json_data_with_vacancies.json") -> None:
-        """Конструктор для инициализации пути к JSON-файлу, который хранит данные по вакансиям."""
+    def __init__(self, file_with_vacancies: Path) -> None:
+        """Конструктор для инициализации пути к JSON-файлу, который хранит данные по вакансиям.
+        :param file_with_vacancies: Путь к JSON-файлу, в котором будут храниться вакансии."""
+        initialize_directories()  # Создаю директорию и файл доп функцией initialize_directories(), если этого еще нет
         self.__file_with_vacancies = file_with_vacancies
 
-    def add_vacancy(self, vacancy: "Vacancy") -> None:
-        """Метод для добавления вакансий в JSON-файл."""
-        pass
+    def add_vacancy(self, vacancy: Union["Vacancy", list["Vacancy"]]) -> None:
+        """Метод для добавления вакансий в JSON-файл.
+        :param vacancy: Экземпляр класса Vacancy или список объектов Vacancy."""
+        try:
+            with open(self.__file_with_vacancies, "r", encoding="utf-8") as file:  # Сразу читаю все вакансии в файле
+                vacancies = json.load(file)
+        except json.JSONDecodeError:  # Эта ошибка возникает, когда невозможно декодировать(преобразовать) JSON-данные
+            vacancies = []
+
+        if isinstance(vacancy, list):  # Преобразую объект или список объектов в словари
+            vacancies.extend([vacancy_to_dict(v) for v in vacancy])  # Использую функцию из "vacancy_to_dict.py"
+        else:
+            vacancies.append(vacancy_to_dict(vacancy))  # Использую функцию из "vacancy_to_dict.py"
+
+        with open(self.__file_with_vacancies, "w", encoding="utf-8") as file:  # Записываю обновлённые данные в файл
+            json.dump(vacancies, file, indent=4, ensure_ascii=False)
 
     def get_vacancy(self, vacancy: "Vacancy") -> None:
         """Метод получения вакансий из JSON-файла."""
@@ -22,19 +43,20 @@ class JSONSaver(BaseFileWork):
         pass
 
 
-
-        """Конструктор для инициализации сохранения списка объектов Vacancy в файл.
-        ВАЖНО:
-            1) При сохранении должно выполняться ИМЕННО добавление вакансий в файл, а не перезапись файла каждый раз;
-            2) При добавлении вакансий в файл, каждая вакансия из поступающего списка должна проверяться по ID
-               на предмет наличия такой вакансии в файле (т.е., проверяем наличие дублей);
-            3) Общее правило работы с дублем, если он обнаружен - дубли никогда повторно не добавляются в файл.
-               Вместо этого по ним мы будем проверять параметр "archived":
-               - Если "archived" = True в поступающем списке объектов Vacancy (т.е. это уже архивная вакансия),
-               то мы её удаляем из файла;
-               - Если "archived" = False в поступающем списке объектов Vacancy (т.е. это ещё действующая вакансия),
-               то мы сравниваем все параметры в файле с теми, что в поступающем списке и если какие-то из параметров
-               отличаются, то обновляем их новыми поступившими значениями."""
+"""
+Конструктор для инициализации сохранения списка объектов Vacancy в файл.
+ВАЖНО:
+    1) При сохранении должно выполняться ИМЕННО добавление вакансий в файл, а не перезапись файла каждый раз;
+    2) При добавлении вакансий в файл, каждая вакансия из поступающего списка должна проверяться по ID
+    на предмет наличия такой вакансии в файле (т.е., проверяем наличие дублей);
+    3) Общее правило работы с дублем, если он обнаружен - дубли никогда повторно не добавляются в файл.
+    Вместо этого по ним мы будем проверять параметр "archived":
+    - Если "archived" = True в поступающем списке объектов Vacancy (т.е. это уже архивная вакансия),
+    то мы её удаляем из файла;
+    - Если "archived" = False в поступающем списке объектов Vacancy (т.е. это ещё действующая вакансия),
+    то мы сравниваем все параметры в файле с теми, что в поступающем списке и если какие-то из параметров
+    отличаются, то обновляем их новыми поступившими значениями.
+"""
 
 """
 2.3. Создать класс для сохранения информации о вакансиях в JSON-файл.
