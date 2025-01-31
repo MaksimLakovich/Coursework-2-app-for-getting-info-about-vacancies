@@ -17,7 +17,7 @@ class BaseFileWork(ABC):
     @abstractmethod
     def add_vacancy(self, vacancy: Union["Vacancy", list["Vacancy"]]) -> None:
         """Метод для добавления вакансий в файл.
-        :param vacancy: Экземпляр класса Vacancy или список объектов Vacancy."""
+        :param vacancy: Экземпляр класса Vacancy (OBJECT) или список объектов Vacancy (LIST OF OBJECTS)."""
         pass
 
     @abstractmethod

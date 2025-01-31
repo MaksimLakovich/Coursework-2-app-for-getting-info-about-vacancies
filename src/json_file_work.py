@@ -14,25 +14,54 @@ class JSONSaver(BaseFileWork):
     def __init__(self, file_with_vacancies: Path) -> None:
         """Конструктор для инициализации пути к JSON-файлу, который хранит данные по вакансиям.
         :param file_with_vacancies: Путь к JSON-файлу, в котором будут храниться вакансии."""
-        initialize_directories()  # Создаю директорию и файл доп функцией initialize_directories(), если этого еще нет
+        initialize_directories()  # Создаю директорию и файл доп функцией initialize_directories(), если этого еще нет.
         self.__file_with_vacancies = file_with_vacancies
 
     def add_vacancy(self, vacancy: Union["Vacancy", list["Vacancy"]]) -> None:
         """Метод для добавления вакансий в JSON-файл.
-        :param vacancy: Экземпляр класса Vacancy или список объектов Vacancy."""
+        :param vacancy: Экземпляр класса Vacancy (OBJECT) или список объектов Vacancy (LIST OF OBJECTS)."""
+        # ШАГ 1: Открываю JSON-файл с существующими вакансиями.
         try:
-            with open(self.__file_with_vacancies, "r", encoding="utf-8") as file:  # Сразу читаю все вакансии в файле
+            with open(self.__file_with_vacancies, "r", encoding="utf-8") as file:  # Сразу читаю все вакансии в файле.
                 vacancies = json.load(file)
-        except json.JSONDecodeError:  # Эта ошибка возникает, когда невозможно декодировать(преобразовать) JSON-данные
+        except json.JSONDecodeError:  # Эта ошибка возникает, когда невозможно декодировать(преобразовать) JSON-данные.
             vacancies = []
 
-        if isinstance(vacancy, list):  # Преобразую объект или список объектов в словари
-            vacancies.extend([vacancy_to_dict(v) for v in vacancy])  # Использую функцию из "vacancy_to_dict.py"
+        # ШАГ 2: Преобразовываю OBJECT/LIST_OF_OBJ в словари при помощи функции в "vacancy_to_dict.py".
+        new_vacancies = []
+        if isinstance(vacancy, list):
+            new_vacancies.extend([vacancy_to_dict(v) for v in vacancy])  # extend - добавляем множество вакансий.
         else:
-            vacancies.append(vacancy_to_dict(vacancy))  # Использую функцию из "vacancy_to_dict.py"
+            new_vacancies.append(vacancy_to_dict(vacancy))  # append - добавляем 1 вакансию.
 
-        with open(self.__file_with_vacancies, "w", encoding="utf-8") as file:  # Записываю обновлённые данные в файл
-            json.dump(vacancies, file, indent=4, ensure_ascii=False)
+        # ШАГ 3: Создаю словарь словарей "existing_vacancies" с данными {id: {вакансии}} для последующего
+        # выполнения быстрого поиска. Тут мы влияем на быстродействие программы. Теперь можно будет быстро проверять,
+        # есть ли вакансия с таким id, а потом обновлять её или удалять при необходимости в ШАГЕ 4.
+        existing_vacancies = {}
+        for vacancy in vacancies:
+            existing_vacancies[vacancy["id"]] = vacancy
+
+        # ШАГ 4: Проверяю дубли вакансий и статус архивации. А потом удаляю, обновляю или добавляю вакансию.
+        for new_vacancy in new_vacancies:
+            if new_vacancy["id"] in existing_vacancies:  # True - если вакансия уже есть в существующих вакансиях.
+                old_vacancy = existing_vacancies[new_vacancy["id"]]
+
+                if new_vacancy["archived"]:  # Удаляю вакансию, если archived == True.
+                    print(f"Удаляем архивную вакансию {new_vacancy["id"]}")
+                    del existing_vacancies[new_vacancy["id"]]
+                    continue
+
+                if old_vacancy != new_vacancy:  # Проверяю, изменились ли данные (кроме ID) и обновляем их, если True.
+                    print(f"Обновляем вакансию {new_vacancy["id"]}")
+                    existing_vacancies[new_vacancy["id"]] = new_vacancy
+            else:
+                print(f"Добавляем новую вакансию {new_vacancy["id"]}")
+                existing_vacancies[new_vacancy["id"]] = new_vacancy  # Если новая вакансия, то просто добавляю её.
+
+        # ШАГ 5: Перезаписываю JSON-файл с обновленными данными по вакансиям.
+        # Преобразовываю обратно словарь словарей "existing_vacancies" в список "list(existing_vacancies.values()".
+        with open(self.__file_with_vacancies, "w", encoding="utf-8") as file:
+            json.dump(list(existing_vacancies.values()), file, indent=4, ensure_ascii=False)
 
     def get_vacancy(self, vacancy: "Vacancy") -> None:
         """Метод получения вакансий из JSON-файла."""
@@ -41,39 +70,3 @@ class JSONSaver(BaseFileWork):
     def delete_vacancy(self, vacancy: "Vacancy") -> None:
         """Метод удаления вакансий из JSON-файла."""
         pass
-
-
-"""
-Конструктор для инициализации сохранения списка объектов Vacancy в файл.
-ВАЖНО:
-    1) При сохранении должно выполняться ИМЕННО добавление вакансий в файл, а не перезапись файла каждый раз;
-    2) При добавлении вакансий в файл, каждая вакансия из поступающего списка должна проверяться по ID
-    на предмет наличия такой вакансии в файле (т.е., проверяем наличие дублей);
-    3) Общее правило работы с дублем, если он обнаружен - дубли никогда повторно не добавляются в файл.
-    Вместо этого по ним мы будем проверять параметр "archived":
-    - Если "archived" = True в поступающем списке объектов Vacancy (т.е. это уже архивная вакансия),
-    то мы её удаляем из файла;
-    - Если "archived" = False в поступающем списке объектов Vacancy (т.е. это ещё действующая вакансия),
-    то мы сравниваем все параметры в файле с теми, что в поступающем списке и если какие-то из параметров
-    отличаются, то обновляем их новыми поступившими значениями.
-"""
-
-"""
-2.3. Создать класс для сохранения информации о вакансиях в JSON-файл.
-ДЛЯ ИНФО!
-a) Данный класс выступит в роли основы для коннектора, заменяя который (класс-коннектор), можно использовать в качестве
-хранилища одну из баз данных или удаленное хранилище со своей специфической системой обращений.
-b) В случае если какие-то из методов выглядят не используемыми для работы с файлами, то не стоит их удалять.
-Они пригодятся для интеграции к БД. Сделайте заглушку в коде.
-
-- ДОПОЛНИТЕЛЬНЫЕ КРИТЕРИИ УСПЕШНОСТИ, КОТОРЫЙ БЫЛИ ОПИСАНЫ В ПУНКТЕ "8.4. Работа с файлами":
-- Реализован класс для работы с JSON-файлами.
-- Класс для работы с JSON-файлами наследуется от абстрактного.
-- В JSON-файл сохраняются данные, соответствующие атрибутам класса вакансий, с данными в виде списка словарей.
-- Файл не перезаписывается при каждом запуске программы, а добавляет данные.
-- Файл не сохраняет дубли вакансий.
-- В экземплярах класса есть атрибут — имя файла, которое может быть назначено при создании экземпляра.
-- Атрибут имени файла — приватный.
-- Атрибут имени файла имеет значение по умолчанию.
-- Реализованы дополнительные классы для работы с файлами.
-"""

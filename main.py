@@ -52,5 +52,3 @@ if __name__ == "__main__":
     )
     print(EXCHANGE_RATES_CACHE)
     json_saver = JSONSaver(file_with_vacancies)
-    json_saver.add_vacancy(vacancy)
-    # json_saver.add_vacancy(vacancies_list)
