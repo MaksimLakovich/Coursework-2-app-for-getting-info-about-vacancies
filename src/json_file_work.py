@@ -1,7 +1,6 @@
 import json
-from os.path import split
 from pathlib import Path
-from typing import Union, Any
+from typing import Union, Any, Optional
 
 from config import file_with_vacancies, initialize_directories
 from src.abs_base_file_work import BaseFileWork
@@ -97,7 +96,7 @@ class JSONSaver(BaseFileWork):
                 found_vacancies.append(vacancy)  # Добавляю эту вакансию в список найденных вакансий.
         return found_vacancies  # Возвращаю список найденных вакансий.
 
-    def delete_vacancy(self, vacancy_to_delete: "Vacancy" = None) -> None:
+    def delete_vacancy(self, vacancy_to_delete: Optional["Vacancy"] = None) -> None:
         """Метод удаления вакансий из JSON-файла.
         :param vacancy_to_delete: Экземпляр класса Vacancy (OBJECT), который будем удалять из файла с вакансиями."""
         # ШАГ 1: Открываю JSON-файл с существующими вакансиями.
