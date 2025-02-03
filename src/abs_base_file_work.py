@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Union
+from typing import Union, Any
 
 from src.get_vacancies import Vacancy
 
@@ -21,16 +21,14 @@ class BaseFileWork(ABC):
         pass
 
     @abstractmethod
-    def get_vacancy(self, vacancy: "Vacancy") -> None:
+    def get_vacancy(self, user_keywords: str = "") -> list[dict[str, Any]]:
         """Метод получения вакансий из файла.
-        ВАЖНО:
-            Метод get_vacancy будет принимать параметры для фильтрации (например, по id или salary или описанию).
-        ?????????????????????????????"""
+        :param user_keywords: Ключевые слова через запятую для фильтрации вакансий.
+        :return: Список найденных вакансий по заданным ключевым словам."""
         pass
 
     @abstractmethod
-    def delete_vacancy(self, vacancy: "Vacancy") -> None:
+    def delete_vacancy(self, id_vacancy: str) -> None:
         """Метод удаления вакансий из файла.
-        Работает с id.
-        ?????????????????????????????"""
+        :param id_vacancy: ID удаляемо вакансии."""
         pass

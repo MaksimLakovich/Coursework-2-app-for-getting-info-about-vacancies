@@ -1,8 +1,9 @@
 import json
+from os.path import split
 from pathlib import Path
 from typing import Union, Any
 
-from config import initialize_directories
+from config import file_with_vacancies, initialize_directories
 from src.abs_base_file_work import BaseFileWork
 from src.get_vacancies import Vacancy
 from src.vacancy_to_dict import vacancy_to_dict
@@ -11,9 +12,9 @@ from src.vacancy_to_dict import vacancy_to_dict
 class JSONSaver(BaseFileWork):
     """Класс-наследник от абстрактного класса (BaseFileWork) для работы с JSON-файлами (работа с вакансиями)."""
 
-    def __init__(self, file_with_vacancies: Path) -> None:
+    def __init__(self, path_to_file_with_vacancies: Path = file_with_vacancies) -> None:
         """Конструктор для инициализации пути к JSON-файлу, который хранит данные по вакансиям.
-        :param file_with_vacancies: Путь к JSON-файлу, в котором будут храниться вакансии."""
+        :param path_to_file_with_vacancies: Путь к JSON-файлу, в котором будут храниться вакансии."""
         initialize_directories()  # Создаю директорию и файл доп функцией initialize_directories(), если этого еще нет.
         self.__file_with_vacancies = file_with_vacancies
 
@@ -53,7 +54,6 @@ class JSONSaver(BaseFileWork):
 
                 if old_vacancy != new_vacancy:  # Проверяю, изменились ли данные (кроме ID) и обновляем их, если True.
                     print(f"Обновляем вакансию {new_vacancy["id"]}")
-                    # existing_vacancies[new_vacancy["id"]] = new_vacancy
                     existing_vacancies[new_vacancy["id"]] = new_vacancy
 
             else:
@@ -65,18 +65,34 @@ class JSONSaver(BaseFileWork):
         with open(self.__file_with_vacancies, "w", encoding="utf-8") as file:
             json.dump(list(existing_vacancies.values()), file, indent=4, ensure_ascii=False)
 
-    def get_vacancy(self, vacancy: "Vacancy") -> None:
-        """Метод получения вакансий из JSON-файла."""
-        pass
+    def get_vacancy(self, user_keywords: str = "") -> list[dict[str, Any]]:
+        """Метод получения вакансий из JSON-файла.
+        :param user_keywords: Ключевые слова через запятую для фильтрации вакансий.
+        :return: Список найденных вакансий по заданным ключевым словам."""
+        # ШАГ 1: Открываю JSON-файл с существующими вакансиями.
+        with open(self.__file_with_vacancies, "r", encoding="utf-8") as file:
+            vacancies_data = json.load(file)
 
-    # def get_vacancy(self) -> list[Vacancy]:
-    #     """Метод получения всех вакансий из JSON-файла, с пересозданием объектов `Vacancy`."""
-    #     try:
-    #         with open(self.__file_with_vacancies, "r", encoding="utf-8") as file:
-    #             vacancies_data = json.load(file)
-    #         return [Vacancy(**data) for data in vacancies_data]  # ⬅ Пересоздаём объекты Vacancy
-    #     except json.JSONDecodeError:
-    #         return []
+        # ШАГ 2: Если ключевые слова не заданы, то тогда возвращаю все вакансии.
+        if not user_keywords:
+            return vacancies_data
+
+        # ШАГ 3: Разбиваю строку на список ключевых слов.
+        input_user_key_words: list = [word.lower().strip() for word in user_keywords.split(",")]
+
+        # ШАГ 4: Ищу вакансии по ключевым словам.
+        found_vacancies = []
+        for vacancy in vacancies_data:
+            found = False  # Флаг по умолчанию в начале цикла перебора слов в описании, что ничего не найдено.
+            for word in input_user_key_words:  # Перебираю ключевые слова и проверяю его наличие в описании вакансии.
+                if word in vacancy["snippet_responsibility"].lower():
+                    found = True  # Меняю флаг, если нашли совпадение в описании вакансии.
+                    # Прерываю цикл перебора ключевых слов, так как уже по одному из них нашли совпадение и нет смысла
+                    # искать другие ключевые слова и делать лишние проверки.
+                    break
+            if found:  # Если хотя бы одно ключевое слово найдено в описании.
+                found_vacancies.append(vacancy)  # Добавляю эту вакансию в список найденных вакансий.
+        return found_vacancies  # Возвращаю список найденных вакансий.
 
     def delete_vacancy(self, vacancy: "Vacancy") -> None:
         """Метод удаления вакансий из JSON-файла."""

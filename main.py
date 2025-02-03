@@ -1,4 +1,3 @@
-from config import file_with_vacancies
 from src.exchange_rates import EXCHANGE_RATES_CACHE
 from src.get_vacancies import Vacancy
 from src.hh_api import HeadHunterAPI
@@ -22,16 +21,16 @@ vacancy = Vacancy(
     "https://hh.ru/vacancy/93353083",
     1000,
     1501,
-    "USD",
+    "RUR",
     "2024-02-16T14:58:28+0300",
     False,
     "Оценивать вид из окна: встречать рассветы на кухне, провожать алые закаты",
 )
 
 # Сохранение информации о вакансиях в файл
-json_saver = JSONSaver(file_with_vacancies)
+json_saver = JSONSaver()
 json_saver.add_vacancy(vacancy)
-# json_saver.add_vacancy(vacancies_list)
+json_saver.add_vacancy(vacancies_list)
 # json_saver.delete_vacancy(vacancy)
 
 
@@ -51,4 +50,4 @@ if __name__ == "__main__":
         vacancy.snippet_responsibility,
     )
     print(EXCHANGE_RATES_CACHE)
-    json_saver = JSONSaver(file_with_vacancies)
+    print(json_saver.get_vacancy("Total, Ownership, Kafka"))
