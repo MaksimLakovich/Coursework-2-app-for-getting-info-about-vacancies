@@ -28,7 +28,7 @@ class BaseFileWork(ABC):
         pass
 
     @abstractmethod
-    def delete_vacancy(self, id_vacancy: str) -> None:
+    def delete_vacancy(self, vacancy_to_delete: "Vacancy") -> None:
         """Метод удаления вакансий из файла.
-        :param id_vacancy: ID удаляемо вакансии."""
+        :param vacancy_to_delete: Экземпляр класса Vacancy (OBJECT), который будем удалять из файла с вакансиями."""
         pass

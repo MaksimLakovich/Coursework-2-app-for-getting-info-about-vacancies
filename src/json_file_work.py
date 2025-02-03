@@ -24,9 +24,9 @@ class JSONSaver(BaseFileWork):
         # ШАГ 1: Открываю JSON-файл с существующими вакансиями.
         try:
             with open(self.__file_with_vacancies, "r", encoding="utf-8") as file:  # Сразу читаю все вакансии в файле.
-                vacancies: list[dict[str, Any]] = json.load(file)
+                vacancies_data: list[dict[str, Any]] = json.load(file)
         except json.JSONDecodeError:  # Эта ошибка возникает, когда невозможно декодировать(преобразовать) JSON-данные.
-            vacancies = []
+            vacancies_data = []
 
         # ШАГ 2: Преобразовываю OBJECT/LIST_OF_OBJ в словари при помощи функции в "vacancy_to_dict.py".
         new_vacancies: list[dict[str, Any]] = []
@@ -39,7 +39,7 @@ class JSONSaver(BaseFileWork):
         # выполнения быстрого поиска. Тут мы влияем на быстродействие программы. Теперь можно будет быстро проверять,
         # есть ли вакансия с таким id, а потом обновлять её или удалять при необходимости в ШАГЕ 4.
         existing_vacancies: dict[str, dict[str, Any]] = {}
-        for vac in vacancies:
+        for vac in vacancies_data:
             existing_vacancies[vac["id"]] = vac
 
         # ШАГ 4: Проверяю дубли вакансий и статус архивации. А потом удаляю, обновляю или добавляю вакансию.
@@ -48,16 +48,16 @@ class JSONSaver(BaseFileWork):
                 old_vacancy: dict[str, Any] = existing_vacancies[new_vacancy["id"]]
 
                 if new_vacancy["archived"]:  # Удаляю вакансию, если archived == True.
-                    print(f"Удаляем архивную вакансию {new_vacancy["id"]}")
+                    print(f"❌Удаляем архивную вакансию {new_vacancy["id"]}")
                     del existing_vacancies[new_vacancy["id"]]
                     continue
 
                 if old_vacancy != new_vacancy:  # Проверяю, изменились ли данные (кроме ID) и обновляем их, если True.
-                    print(f"Обновляем вакансию {new_vacancy["id"]}")
+                    print(f"🔄Обновляем вакансию {new_vacancy["id"]}")
                     existing_vacancies[new_vacancy["id"]] = new_vacancy
 
             else:
-                print(f"Добавляем новую вакансию {new_vacancy["id"]}")
+                print(f"✅Добавляем новую вакансию {new_vacancy["id"]}")
                 existing_vacancies[new_vacancy["id"]] = new_vacancy  # Если новая вакансия, то просто добавляю её.
 
         # ШАГ 5: Перезаписываю JSON-файл с обновленными данными по вакансиям.
@@ -70,8 +70,11 @@ class JSONSaver(BaseFileWork):
         :param user_keywords: Ключевые слова через запятую для фильтрации вакансий.
         :return: Список найденных вакансий по заданным ключевым словам."""
         # ШАГ 1: Открываю JSON-файл с существующими вакансиями.
-        with open(self.__file_with_vacancies, "r", encoding="utf-8") as file:
-            vacancies_data = json.load(file)
+        try:
+            with open(self.__file_with_vacancies, "r", encoding="utf-8") as file:
+                vacancies_data: list[dict[str, Any]] = json.load(file)
+        except json.JSONDecodeError:  # Эта ошибка возникает, когда невозможно декодировать(преобразовать) JSON-данные.
+            vacancies_data = []
 
         # ШАГ 2: Если ключевые слова не заданы, то тогда возвращаю все вакансии.
         if not user_keywords:
@@ -94,6 +97,28 @@ class JSONSaver(BaseFileWork):
                 found_vacancies.append(vacancy)  # Добавляю эту вакансию в список найденных вакансий.
         return found_vacancies  # Возвращаю список найденных вакансий.
 
-    def delete_vacancy(self, vacancy: "Vacancy") -> None:
-        """Метод удаления вакансий из JSON-файла."""
-        pass
+    def delete_vacancy(self, vacancy_to_delete: "Vacancy" = None) -> None:
+        """Метод удаления вакансий из JSON-файла.
+        :param vacancy_to_delete: Экземпляр класса Vacancy (OBJECT), который будем удалять из файла с вакансиями."""
+        # ШАГ 1: Открываю JSON-файл с существующими вакансиями.
+        try:
+            with open(self.__file_with_vacancies, "r", encoding="utf-8") as file:
+                vacancies_data: list[dict[str, Any]] = json.load(file)
+        except json.JSONDecodeError:  # Эта ошибка возникает, когда невозможно декодировать(преобразовать) JSON-данные.
+            vacancies_data = []
+
+        # ШАГ 2: Если ничего не передали на удаление, просто выходим.
+        if not vacancy_to_delete:
+            return
+
+        # ШАГ 3: Удаляю вакансию из JSON-файла с существующими вакансиями.
+        vacancies_data_after_deletion = []
+        for vacancy in vacancies_data:
+            if vacancy["id"] != vacancy_to_delete.id:
+                vacancies_data_after_deletion.append(vacancy)
+
+        # ШАГ 4: Перезаписываю JSON-файл с обновленными данными по вакансиям.
+        with open(self.__file_with_vacancies, "w", encoding="utf-8") as file:
+            json.dump(vacancies_data_after_deletion, file, indent=4, ensure_ascii=False)
+
+        print(f"❌Вакансия {vacancy_to_delete.id} удалена из JSON-файла.")

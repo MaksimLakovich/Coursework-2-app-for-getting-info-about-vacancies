@@ -35,12 +35,12 @@ class HeadHunterAPI(BaseAPI):
                     self.__vacancies.extend(vacancies)
                     self.__params["page"] += 1
                 except requests.exceptions.RequestException as info:
-                    print(f"Ошибка при обращении к API hh.ru: {info}")
+                    print(f"❌Ошибка при обращении к API hh.ru: {info}")
                     return []
                 except KeyError:
-                    print("Некорректный формат ответа API hh.ru.")
+                    print("❌Некорректный формат ответа API hh.ru.")
                     return []
             else:
-                print(f"Ошибка: {response.status_code}, текст: {response.text}")
+                print(f"❌Ошибка: {response.status_code}, текст: {response.text}")
                 return []
         return self.__vacancies

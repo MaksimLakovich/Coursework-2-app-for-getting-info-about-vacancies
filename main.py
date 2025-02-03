@@ -31,7 +31,7 @@ vacancy = Vacancy(
 json_saver = JSONSaver()
 json_saver.add_vacancy(vacancy)
 json_saver.add_vacancy(vacancies_list)
-# json_saver.delete_vacancy(vacancy)
+json_saver.delete_vacancy(vacancy)
 
 
 if __name__ == "__main__":
