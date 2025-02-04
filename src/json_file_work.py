@@ -82,19 +82,22 @@ class JSONSaver(BaseFileWork):
         # ШАГ 3: Разбиваю строку на список ключевых слов.
         input_user_key_words: list = [word.lower().strip() for word in user_keywords.split(",")]
 
-        # ШАГ 4: Ищу вакансии по ключевым словам.
+        # ШАГ 4: Ищу вакансии по: 1) сразу по ключевым словам в описании/названии; 2) потом по городу(-ам).
         found_vacancies = []
         for vacancy in vacancies_data:
-            found = False  # Флаг по умолчанию в начале цикла перебора слов в описании, что ничего не найдено.
-            for word in input_user_key_words:  # Перебираю ключевые слова и проверяю его наличие в описании вакансии.
-                if word in vacancy["snippet_responsibility"].lower():
-                    found = True  # Меняю флаг, если нашли совпадение в описании вакансии.
+            found = False  # Флаг по умолчанию, что ничего не найдено в начале цикла перебора слов в описании/названии.
+            for word in input_user_key_words:  # Перебираю ключевые слова и проверяю их наличие в описании/названии.
+                if word in vacancy["snippet_responsibility"].lower() or word in vacancy["name"].lower():
+                    found = True  # Меняю флаг, если нашли совпадение в вакансии.
+                    continue  # Продолжаем проверять "area_name".
+                if word in vacancy["area_name"].lower():
+                    found = True
                     # Прерываю цикл перебора ключевых слов, так как уже по одному из них нашли совпадение и нет смысла
                     # искать другие ключевые слова и делать лишние проверки.
-                    break
-            if found:  # Если хотя бы одно ключевое слово найдено в описании.
+                    break  # Если нашли город, то дальше проверять не нужно.
+            if found:  # Если хотя бы одно ключевое слово найдено в описании/названии вакансии или найден город.
                 found_vacancies.append(vacancy)  # Добавляю эту вакансию в список найденных вакансий.
-        return found_vacancies  # Возвращаю список найденных вакансий.
+        return found_vacancies
 
     def delete_vacancy(self, vacancy_to_delete: Optional["Vacancy"] = None) -> None:
         """Метод удаления вакансий из JSON-файла.

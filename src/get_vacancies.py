@@ -115,3 +115,17 @@ class Vacancy:
             )
             for data in vacancies_data
         ]
+
+    def __str__(self) -> str:
+        """Магический метод возвращает строковое представление вакансии для print()."""
+        return (
+            f"📌 {self.name} ({self.area_name})\n"
+            f"💰 Зарплата: {self.salary_from} - {self.salary_to} {self.salary_currency}\n"
+            f"🔗 {self.alternate_url}\n"
+            f"📅 Опубликовано: {self.published_at}\n"
+            f"📝 Описание: {self.snippet_responsibility[:1000]}..."
+        )  # Обрезаю слишком длинное описание до 1000.
+
+    def __repr__(self) -> str:
+        """Магический метод возвращает краткую строку для отладки (repr)."""
+        return f"Vacancy({self.id}, {self.name}, {self.salary_from}-{self.salary_to} {self.salary_currency})"
