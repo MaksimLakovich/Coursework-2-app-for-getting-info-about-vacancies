@@ -1,9 +1,10 @@
 [tool.poetry]
-name = "coursework-2-app-for-getting-info-about-vacancies"
+name = "read_hh_vacancies"
 version = "0.1.0"
 description = ""
 authors = ["Maksim Lakovich <maks.lakovich@gmail.com>"]
 readme = "README.md"
+package-mode = false
 
 
 [tool.poetry.dependencies]

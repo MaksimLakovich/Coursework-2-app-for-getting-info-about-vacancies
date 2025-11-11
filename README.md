@@ -1,4 +1,4 @@
-# Проект 2. Приложение для работы с API-сервисами по размещению вакансий (на примере HeadHunter.ru)
+# Программа для работы с API-сервисами по размещению вакансий (на примере HeadHunter.ru)
 
 [1. Цель и суть проекта](#title1) / 
 [2. Основные модули](#title2) / 
@@ -122,7 +122,8 @@
 ### <a id="title5">5. Установка проекта</a>
 1. Клонируйте репозиторий:
 ```
-git clone https://github.com/MaksimLakovich/Coursework-2-app-for-getting-info-about-vacancies.git
+git clone https://github.com/MaksimLakovich/Read_hh_vacancies.git
+
 ```
 
 2. Установите зависимости:
