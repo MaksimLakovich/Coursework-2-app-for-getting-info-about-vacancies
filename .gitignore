@@ -164,9 +164,7 @@ cython_debug/
 .DS_Store
 
 pytest.ini
-.env.example
-config.py
 logger.py
-logs
+
 tests/conftest.py
-data/example_data_from_hh.json
+example/
